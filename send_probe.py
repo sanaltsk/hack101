@@ -18,12 +18,13 @@ for line in lines:
     mac = data[1]
     name = data[2]
     signal_strength = data[4]
+    is_mobile = 'false'
 
     try:
         get_data = read_data[str(mac)]
     except KeyError:
         pass
     if not hasattr(locals(), 'get_data') or get_data['signal'] < signal_strength:
-        read_data[str(mac)] = {"name":name,"signal":signal_strength,"lat":lat, "lon":lon}
+        read_data[str(mac)] = {"name":name,"signal":signal_strength,"lat":lat, "lon":lon, "is_mobile":is_mobile}
 
 root.child('probe').set(read_data)

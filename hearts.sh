@@ -9,5 +9,5 @@ do
     monstop
 
     #Run Python script to upload data to Server
-    python3 send_probe.py
+    python send_probe.py
 done
