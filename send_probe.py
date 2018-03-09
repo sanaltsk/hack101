@@ -1,42 +1,29 @@
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
-import requests
-import json
+from utils import *
 
-def location():
-  send_url = 'http://freegeoip.net/json'
-  r = requests.get(send_url)
-  j = json.loads(r.text)
-  lat = j['latitude']
-  lon = j['longitude']
-  return lat,lon
-
-
-lines=open("log.txt").readlines()
+lines=open("probes.data").readlines()
 cred = credentials.Certificate('hack101-b26f1b2127fd.json')
 firebase_admin.initialize_app(cred, {
     'databaseURL' : 'https://hack101-46d94.firebaseio.com'
 })
 
 root = db.reference()
+read_data = root.child('probe').get()
+lat,lon = get_location()
 
-push_data = {}
-count = 0
 for line in lines:
     data = line.split('\t')
     mac = data[1]
     name = data[2]
-    lat,lon = location()
-    singnal_strength = data[4]
+    signal_strength = data[4]
 
-    print(mac+":" + name+":"+singnal_strength)
+    try:
+        get_data = read_data[str(mac)]
+    except KeyError:
+        pass
+    if not hasattr(locals(), 'get_data') or get_data['signal'] < signal_strength:
+        read_data[str(mac)] = {"name":name,"signal":signal_strength,"lat":lat, "lon":lon}
 
-    if mac not in push_data:
-        push_data[mac] = {"name":name,"signal":singnal_strength,"lat":lat, "lon":lon}
-        probe_data = root.child('probe').child(str(mac)).set(push_data[mac])
-        count+=1
-
-# print(push_data)
-# result = db.reference('users').get()
-
+root.child('probe').set(read_data)
